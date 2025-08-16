@@ -105,10 +105,10 @@
         }
 
         /* Colores de botones específicos */
-        #reiniciarBtn, #reiniciarDesdeResultadosBtn, #volverNivelesBtn, #volverBtn {
+        #reiniciarBtn, #volverBtn, #volverNivelesBtn {
             background-color: #f44336; /* Rojo */
         }
-        #cambiarBtn {
+        #cambiarBtn, #reiniciarDesdeResultadosBtn {
             background-color: #dc3545; /* Rojo más intenso */
         }
         #nivelesBtn, #nivel1Btn, #nivel2Btn, #nivel3Btn {
@@ -228,7 +228,7 @@
         let tiempoTranscurrido = 0;
         let intervaloCronometro;
         let siguienteNumero = 1;
-        let nivelActual = 1; 
+        let nivelActual = 1;
         let coloresNivel3 = {};
 
         // Cargar resultados desde localStorage al inicio
@@ -245,7 +245,7 @@
             juegoPantalla.classList.remove('activa');
             resultadosPantalla.classList.add('activa');
             nivelesPantalla.classList.remove('activa');
-            actualizarListaResultados();
+            actualizarListaResultados(); // Asegurarse de que se actualice al mostrar
         }
 
         function mostrarNiveles() {
@@ -259,7 +259,8 @@
             const numeros = Array.from({length: 36}, (_, i) => i + 1);
             for (let i = numeros.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [numeros[i], numeros[j]] = [numeros[j], numeros[i]];
+                const temp = numeros.splice(i, 1)[0];
+                numeros.splice(j, 0, temp);
             }
             return numeros;
         }
@@ -280,12 +281,19 @@
                     const colorAleatorio = `rgb(${r}, ${g}, ${b})`;
                     recuadro.style.backgroundColor = colorAleatorio;
                     recuadro.classList.add('nivel-3-color');
-                    coloresNivel3[numero] = colorAleatorio;
+                    coloresNivel3.push({ numero: numero, color: colorAleatorio });
                 }
 
                 recuadro.addEventListener('click', () => manejarClic(recuadro, numero));
                 cuadriculaElemento.appendChild(recuadro);
             });
+             if (nivelActual === 3) {
+                // Crear un objeto para acceder fácilmente al color por número
+                coloresNivel3 = coloresNivel3.reduce((acc, item) => {
+                    acc.numero = item.color;
+                    return acc;
+                }, {});
+            }
         }
         
         function iniciarCronometro() {
@@ -322,7 +330,10 @@
                 } else if (nivelActual === 2) {
                     // No cambia de color
                 } else if (nivelActual === 3) {
-                    recuadro.style.backgroundColor = coloresNivel3[numero];
+                    const color = coloresNivel3.find(c => c.numero === numero)?.color;
+                    if (color) {
+                        recuadro.style.backgroundColor = color;
+                    }
                 }
                 
                 siguienteNumero++;
@@ -342,14 +353,12 @@
         }
 
         function actualizarListaResultados() {
-            // Se lee de localStorage para asegurar la última versión
             const resultadosGuardados = JSON.parse(localStorage.getItem('juegoNumerosResultados')) || [];
-            listaResultadosElemento.innerHTML = ''; // Limpia la lista anterior
+            listaResultadosElemento.innerHTML = '';
 
             if (resultadosGuardados.length === 0) {
                 listaResultadosElemento.innerHTML = '<li>Aún no has completado ninguna partida.</li>';
             } else {
-                // Ordenar por nivel, luego por tiempo ascendente
                 resultadosGuardados.sort((a, b) => {
                     if (a.nivel !== b.nivel) {
                         return a.nivel - b.nivel;
@@ -361,12 +370,23 @@
                     return totalSecA - totalSecB;
                 });
 
-                resultadosGuardados.forEach((res, index) => {
+                resultadosGuardados.forEach(res => {
                     const li = document.createElement('li');
                     li.textContent = `Nivel ${res.nivel}: ${res.tiempo}`;
                     listaResultadosElemento.appendChild(li);
                 });
             }
+        }
+
+        function cambiarColores() {
+            const recuadros = document.querySelectorAll('.recuadro');
+            recuadros.forEach(recuadro => {
+                const r = Math.floor(Math.random() * 76) + 180;
+                const g = Math.floor(Math.random() * 101) + 100;
+                const b = Math.floor(Math.random() * 51);
+                recuadro.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+                recuadro.style.color = '#fff';
+            });
         }
 
         // --- Eventos de los botones ---
@@ -393,6 +413,7 @@
 
         // Inicializar el juego
         reiniciarJuego();
+        actualizarListaResultados(); // Cargar resultados al inicio
     </script>
 </body>
 </html>
