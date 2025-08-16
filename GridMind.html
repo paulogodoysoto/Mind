@@ -266,6 +266,7 @@
         let coloresNivel3 = {};
         let numerosCuadricula = [];
         let juegoTerminado = false;
+        let puntuacionFinal = 0;
 
         let resultados = JSON.parse(localStorage.getItem('juegoNumerosResultados')) || [];
 
@@ -367,6 +368,7 @@
             siguienteNumero = 1;
             mensajeElemento.textContent = "";
             juegoTerminado = false;
+            puntuacionFinal = 0;
             
             const recuadros = document.querySelectorAll('.recuadro');
             recuadros.forEach(recuadro => {
@@ -389,6 +391,7 @@
             siguienteNumero = 1;
             mensajeElemento.textContent = "";
             juegoTerminado = false;
+            puntuacionFinal = 0;
             crearCuadricula(false);
             mostrarJuego();
         }
@@ -408,16 +411,46 @@
                 if (siguienteNumero > 36) {
                     pararCronometro();
                     juegoTerminado = true;
+                    puntuacionFinal = calcularPuntuacion();
+                    const rango = obtenerRango(puntuacionFinal);
                     const tiempoFinal = cronometroElemento.textContent;
-                    mensajeElemento.textContent = `¡Felicitaciones! Completaste el Nivel ${nivelActual} en ${tiempoFinal}.`;
-                    guardarResultado(tiempoFinal, nivelActual);
+                    mensajeElemento.textContent = `¡Felicitaciones! Completaste el Nivel ${nivelActual} en ${tiempoFinal} con una Puntuación GridMind de ${puntuacionFinal.toFixed(0)} (${rango}).`;
+                    guardarResultado(tiempoFinal, nivelActual, puntuacionFinal);
                 }
             }
         }
+        
+        function calcularPuntuacion() {
+            let puntosBase;
+            if (nivelActual === 1) {
+                puntosBase = 100;
+            } else if (nivelActual === 2) {
+                puntosBase = 200;
+            } else {
+                puntosBase = 300;
+            }
+            // Si el tiempo es 0, evitamos la división por cero y retornamos 0
+            if (tiempoTranscurrido === 0) {
+                return 0;
+            }
+            return puntosBase / (tiempoTranscurrido / 60);
+        }
 
-        function guardarResultado(tiempo, nivel) {
+        function obtenerRango(puntuacion) {
+            if (puntuacion >= 200) {
+                return "Concentración de Genio";
+            } else if (puntuacion >= 101) {
+                return "Concentración Avanzada";
+            } else if (puntuacion >= 50) {
+                return "Concentración Promedio";
+            } else {
+                return "Concentración de Principiante";
+            }
+        }
+
+        function guardarResultado(tiempo, nivel, puntuacion) {
             let resultadosGuardados = JSON.parse(localStorage.getItem('juegoNumerosResultados')) || [];
-            resultadosGuardados.push({ tiempo, nivel });
+            resultadosGuardados.push({ tiempo, nivel, puntuacion });
             localStorage.setItem('juegoNumerosResultados', JSON.stringify(resultadosGuardados));
         }
 
@@ -432,16 +465,12 @@
                     if (a.nivel !== b.nivel) {
                         return a.nivel - b.nivel;
                     }
-                    const [minA, secA] = a.tiempo.split(':').map(Number);
-                    const [minB, secB] = b.tiempo.split(':').map(Number);
-                    const totalSecA = minA * 60 + secA;
-                    const totalSecB = minB * 60 + secB;
-                    return totalSecA - totalSecB;
+                    return b.puntuacion - a.puntuacion; // Ordenar por puntuación de mayor a menor
                 });
     
                 resultadosGuardados.forEach(res => {
                     const li = document.createElement('li');
-                    li.textContent = `Nivel ${res.nivel}: ${res.tiempo}`;
+                    li.textContent = `Nivel ${res.nivel}: ${res.tiempo} - Puntuación: ${res.puntuacion.toFixed(0)}`;
                     listaResultadosElemento.appendChild(li);
                 });
             }
@@ -453,9 +482,10 @@
                 const tiempoFinal = cronometroElemento.textContent;
                 
                 if (juegoTerminado) {
-                    mensajeCompartir = `¡Acabo de completar GridMind en el Nivel ${nivelActual} con un tiempo de ${tiempoFinal}! ¿Puedes superar mi récord? ¡Juega aquí!`;
+                    const rango = obtenerRango(puntuacionFinal);
+                    mensajeCompartir = `¡Acabo de completar GridMind en el Nivel ${nivelActual} con una Puntuación GridMind de ${puntuacionFinal.toFixed(0)} (${rango})! Entrena tu concentración mental. ¿Puedes superar mi récord? ¡Juega aquí!`;
                 } else {
-                    mensajeCompartir = '¡Desafía tu mente con GridMind! Un juego de agilidad mental y destreza con los números.';
+                    mensajeCompartir = '¡Desafía tu mente con GridMind! Entrena tu concentración mental con este juego de agilidad y destreza con los números.';
                 }
 
                 navigator.share({
