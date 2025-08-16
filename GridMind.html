@@ -259,6 +259,7 @@
         let nivelActual = 1;
         let coloresNivel3 = {};
         let numerosCuadricula = [];
+        let juegoTerminado = false; // Nueva variable para saber si el juego ha terminado
 
         let resultados = JSON.parse(localStorage.getItem('juegoNumerosResultados')) || [];
 
@@ -359,6 +360,7 @@
             cronometroElemento.style.color = "#A3D9A3";
             siguienteNumero = 1;
             mensajeElemento.textContent = "";
+            juegoTerminado = false; // Reiniciar el estado del juego
             
             const recuadros = document.querySelectorAll('.recuadro');
             recuadros.forEach(recuadro => {
@@ -380,6 +382,7 @@
             cronometroElemento.style.color = "#A3D9A3";
             siguienteNumero = 1;
             mensajeElemento.textContent = "";
+            juegoTerminado = false; // Reiniciar el estado del juego
             crearCuadricula(false);
             mostrarJuego();
         }
@@ -398,6 +401,7 @@
                 siguienteNumero++;
                 if (siguienteNumero > 36) {
                     pararCronometro();
+                    juegoTerminado = true; // El juego ha terminado
                     const tiempoFinal = cronometroElemento.textContent;
                     mensajeElemento.textContent = `¡Felicitaciones! Completaste el Nivel ${nivelActual} en ${tiempoFinal}.`;
                     guardarResultado(tiempoFinal, nivelActual);
@@ -439,15 +443,23 @@
         
         function compartirJuego() {
             if (navigator.share) {
+                let mensajeCompartir;
+                const tiempoFinal = cronometroElemento.textContent;
+                
+                if (juegoTerminado) {
+                    mensajeCompartir = `¡Acabo de completar GridMind en el Nivel ${nivelActual} con un tiempo de ${tiempoFinal}! ¿Puedes superar mi récord? ¡Juega aquí!`;
+                } else {
+                    mensajeCompartir = '¡Desafía tu mente con GridMind! Un juego de agilidad mental y destreza con los números.';
+                }
+
                 navigator.share({
                     title: 'GridMind',
-                    text: '¡Desafía tu mente con GridMind! Un juego de agilidad mental y destreza con los números.',
+                    text: mensajeCompartir,
                     url: window.location.href
                 }).then(() => {
                     console.log('Juego compartido con éxito');
                 }).catch(console.error);
             } else {
-                // Mensaje de respaldo si la API no está disponible
                 alert('Tu navegador no soporta la función de compartir. Puedes copiar y pegar la URL para compartir el juego.');
             }
         }
