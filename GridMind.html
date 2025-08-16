@@ -105,14 +105,17 @@
         }
 
         /* Colores de botones específicos */
-        #reiniciarBtn, #cambiarBtn, #reiniciarDesdeResultadosBtn {
-            background-color: #f44336;
+        #reiniciarBtn, #reiniciarDesdeResultadosBtn, #volverNivelesBtn, #volverBtn {
+            background-color: #f44336; /* Rojo */
         }
-        #nivelesBtn {
-            background-color: #2196F3;
+        #cambiarBtn {
+            background-color: #dc3545; /* Rojo más intenso */
         }
-        #resultadosBtn, #volverBtn, #nivel1Btn, #nivel2Btn, #nivel3Btn {
-            background-color: #009688;
+        #nivelesBtn, #nivel1Btn, #nivel2Btn, #nivel3Btn {
+            background-color: #2196F3; /* Azul */
+        }
+        #resultadosBtn {
+            background-color: #009688; /* Verde azulado */
         }
         
         /* Efecto hover */
@@ -176,8 +179,8 @@
             <div id="cuadricula"></div>
             <div id="mensaje"></div>
             <div id="botones">
-                <button id="reiniciarBtn" class="boton">Reiniciar</button>
                 <button id="cambiarBtn" class="boton">Nueva Partida</button>
+                <button id="reiniciarBtn" class="boton">Reiniciar</button>
                 <button id="nivelesBtn" class="boton">Niveles</button>
                 <button id="resultadosBtn" class="boton">Resultados</button>
             </div>
@@ -225,9 +228,10 @@
         let tiempoTranscurrido = 0;
         let intervaloCronometro;
         let siguienteNumero = 1;
-        let nivelActual = 1; // Nivel predeterminado
+        let nivelActual = 1; 
         let coloresNivel3 = {};
 
+        // Cargar resultados desde localStorage al inicio
         let resultados = JSON.parse(localStorage.getItem('juegoNumerosResultados')) || [];
 
         // --- Funciones de visualización de pantallas ---
@@ -263,7 +267,7 @@
         function crearCuadricula() {
             cuadriculaElemento.innerHTML = '';
             const numeros = generarNumeros();
-            coloresNivel3 = {}; // Resetear colores para el Nivel 3
+            coloresNivel3 = {};
             numeros.forEach(numero => {
                 const recuadro = document.createElement('div');
                 recuadro.className = 'recuadro';
@@ -316,7 +320,7 @@
                 if (nivelActual === 1) {
                     recuadro.classList.add('correcto');
                 } else if (nivelActual === 2) {
-                    // No cambia de color, simplemente queda en su estado original
+                    // No cambia de color
                 } else if (nivelActual === 3) {
                     recuadro.style.backgroundColor = coloresNivel3[numero];
                 }
@@ -338,8 +342,9 @@
         }
 
         function actualizarListaResultados() {
+            // Se lee de localStorage para asegurar la última versión
             const resultadosGuardados = JSON.parse(localStorage.getItem('juegoNumerosResultados')) || [];
-            listaResultadosElemento.innerHTML = '';
+            listaResultadosElemento.innerHTML = ''; // Limpia la lista anterior
 
             if (resultadosGuardados.length === 0) {
                 listaResultadosElemento.innerHTML = '<li>Aún no has completado ninguna partida.</li>';
