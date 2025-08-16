@@ -113,6 +113,11 @@
             transition: background-color 0.3s ease, box-shadow 0.3s ease;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+        
+        .boton-pequeno {
+            padding: 8px 12px;
+            font-size: 0.8em;
+        }
 
         /* Colores de botones específicos */
         #reiniciarBtn, #volverBtn, #volverNivelesBtn {
@@ -126,6 +131,9 @@
         }
         #resultadosBtn {
             background-color: #009688;
+        }
+        #accesoDirectoBtn {
+            background-color: #6c757d;
         }
         
         /* Efecto hover */
@@ -200,6 +208,7 @@
                 <button id="reiniciarBtn" class="boton">Reiniciar</button>
                 <button id="nivelesBtn" class="boton">Niveles</button>
                 <button id="resultadosBtn" class="boton">Resultados</button>
+                <button id="accesoDirectoBtn" class="boton boton-pequeno">Crear Acceso</button>
             </div>
         </div>
     </div>
@@ -241,6 +250,7 @@
         const nivel2Btn = document.getElementById('nivel2Btn');
         const nivel3Btn = document.getElementById('nivel3Btn');
         const volverNivelesBtn = document.getElementById('volverNivelesBtn');
+        const accesoDirectoBtn = document.getElementById('accesoDirectoBtn');
 
         let tiempoTranscurrido = 0;
         let intervaloCronometro;
@@ -315,19 +325,16 @@
                     
                     let r, g, b;
                     if (tiempoTranscurrido <= 30) {
-                        // Fase 1: Verde pastel a verde más oscuro
                         const progress = tiempoTranscurrido / 30;
                         r = Math.floor(163 - (163 - 85) * progress);
                         g = Math.floor(217 - (217 - 107) * progress);
                         b = Math.floor(163 - (163 - 48) * progress);
                     } else if (tiempoTranscurrido <= 40) {
-                        // Fase 2: Verde a amarillo
                         const progress = (tiempoTranscurrido - 30) / 10;
                         r = Math.floor(85 + (255 - 85) * progress);
                         g = Math.floor(107 + (255 - 107) * progress);
                         b = 48 - Math.floor(48 * progress);
                     } else {
-                        // Fase 3: Amarillo a rojo (tonos de llama)
                         const progress = (tiempoTranscurrido - 40) / 140;
                         r = 255;
                         g = Math.floor(255 - (255 * progress));
@@ -429,6 +436,18 @@
             }
         }
 
+        function crearAccesoDirecto() {
+            const url = window.location.href;
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'GridMind.html';
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+
         reiniciarBtn.addEventListener('click', reiniciarJuegoActual);
         cambiarBtn.addEventListener('click', iniciarNuevaPartida);
         resultadosBtn.addEventListener('click', mostrarResultados);
@@ -436,6 +455,7 @@
         volverBtn.addEventListener('click', mostrarJuego);
         volverNivelesBtn.addEventListener('click', mostrarJuego);
         reiniciarDesdeResultadosBtn.addEventListener('click', iniciarNuevaPartida);
+        accesoDirectoBtn.addEventListener('click', crearAccesoDirecto);
 
         nivel1Btn.addEventListener('click', () => {
             nivelActual = 1;
