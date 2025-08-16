@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Números</title>
+    <title>GridMind</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -26,20 +26,31 @@
             grid-template-rows: repeat(6, 80px);
             gap: 5px;
             margin-bottom: 20px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #fcfcfc;
+            max-width: 90%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .recuadro {
-    aspect-ratio: 1 / 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 3em;
-    font-weight: bold;
-    border: 2px solid #333;
-    cursor: pointer;
-    transition: transform 0.1s, background-color 0.5s;
-}
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            font-weight: bold;
+            border: 2px solid #333;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.5s;
+        }
         .recuadro:hover {
             transform: scale(1.05);
+        }
+        .correcto {
+            background-color: #4CAF50; /* Verde */
+            color: white;
+            pointer-events: none; /* Deshabilita clics en los números correctos */
         }
         #botones {
             display: flex;
@@ -52,40 +63,43 @@
             border: 1px solid #333;
             border-radius: 5px;
             background-color: #ddd;
-}
-        #contenedor-principal {
-    border: 2px solid #333;
-    border-radius: 10px;
-    padding: 20px;
-    background-color: #fcfcfc;
-    max-width: 90%;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
+        }
+        #mensaje {
+            font-size: 1.5em;
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div id="contenedor-principal">
-    <div id="cronometro">00:00</div>
-    <div id="cuadricula"></div>
-    <div id="botones">
-        <button id="reiniciarBtn" class="boton">Reiniciar</button>
-        <button id="cambiarBtn" class="boton">Nueva Partida</button>
-        <button id="coloresBtn" class="boton">Colores</button>
+        <div id="cronometro">00:00</div>
+        <div id="cuadricula"></div>
+        <div id="mensaje"></div>
+        <div id="botones">
+            <button id="reiniciarBtn" class="boton">Reiniciar</button>
+            <button id="cambiarBtn" class="boton">Nueva Partida</button>
+            <button id="coloresBtn" class="boton">Colores</button>
+            <button id="resultadosBtn" class="boton">Resultados</button>
+        </div>
     </div>
 
     <script>
-        // --- Variables del juego ---
         const cronometroElemento = document.getElementById('cronometro');
         const cuadriculaElemento = document.getElementById('cuadricula');
         const reiniciarBtn = document.getElementById('reiniciarBtn');
         const cambiarBtn = document.getElementById('cambiarBtn');
         const coloresBtn = document.getElementById('coloresBtn');
+        const resultadosBtn = document.getElementById('resultadosBtn');
+        const mensajeElemento = document.getElementById('mensaje');
 
-        let cronometro;
         let tiempoTranscurrido = 0;
         let intervaloCronometro;
-        
-        // --- Lógica del juego ---
+        let siguienteNumero = 1;
+
+        let resultados = JSON.parse(localStorage.getItem('juegoNumerosResultados')) || [];
+
         function generarNumeros() {
             const numeros = Array.from({length: 36}, (_, i) => i + 1);
             for (let i = numeros.length - 1; i > 0; i--) {
@@ -102,20 +116,15 @@
                 const recuadro = document.createElement('div');
                 recuadro.className = 'recuadro';
                 recuadro.textContent = numero;
+                recuadro.addEventListener('click', () => manejarClic(recuadro, numero));
                 cuadriculaElemento.appendChild(recuadro);
             });
         }
         
         function iniciarCronometro() {
-            if (!cronometro) {
-                tiempoTranscurrido = 0;
-                cronometro = true;
+            if (!intervaloCronometro) {
                 intervaloCronometro = setInterval(() => {
                     tiempoTranscurrido++;
-                    if (tiempoTranscurrido > 180) { // 3 minutos
-                        tiempoTranscurrido = 180;
-                        pararCronometro();
-                    }
                     const minutos = Math.floor(tiempoTranscurrido / 60).toString().padStart(2, '0');
                     const segundos = (tiempoTranscurrido % 60).toString().padStart(2, '0');
                     cronometroElemento.textContent = `${minutos}:${segundos}`;
@@ -125,38 +134,104 @@
         
         function pararCronometro() {
             clearInterval(intervaloCronometro);
-            cronometro = false;
-        }
-
-        function reiniciarJuego() {
-            pararCronometro();
-            cronometroElemento.textContent = "00:00";
+            intervaloCronometro = null;
         }
         
+        function reiniciarJuego() {
+            pararCronometro();
+            tiempoTranscurrido = 0;
+            cronometroElemento.textContent = "00:00";
+            siguienteNumero = 1;
+            mensajeElemento.textContent = "";
+            crearCuadricula();
+        }
+        
+        function manejarClic(recuadro, numero) {
+            iniciarCronometro();
+
+            if (numero === siguienteNumero) {
+                recuadro.classList.add('correcto');
+                siguienteNumero++;
+                if (siguienteNumero > 36) {
+                    pararCronometro();
+                    mensajeElemento.textContent = `¡Felicitaciones! Completaste el juego en ${cronometroElemento.textContent}.`;
+                    guardarResultado(cronometroElemento.textContent);
+                }
+            }
+        }
+
+        function guardarResultado(tiempo) {
+            resultados.push(tiempo);
+            localStorage.setItem('juegoNumerosResultados', JSON.stringify(resultados));
+        }
+
+        function mostrarResultados() {
+            const nuevaVentana = window.open('', '_blank', 'width=400,height=500');
+            const resultadosGuardados = JSON.parse(localStorage.getItem('juegoNumerosResultados')) || [];
+
+            nuevaVentana.document.write(`
+                <!DOCTYPE html>
+                <html lang="es">
+                <head>
+                    <title>Resultados del Juego</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            padding: 20px;
+                            text-align: center;
+                        }
+                        h2 {
+                            color: #333;
+                        }
+                        ul {
+                            list-style-type: none;
+                            padding: 0;
+                        }
+                        li {
+                            background-color: #f0f0f0;
+                            margin: 5px 0;
+                            padding: 10px;
+                            border-radius: 5px;
+                            font-weight: bold;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h2>Tus Resultados</h2>
+                    <ul id="lista-resultados"></ul>
+                </body>
+                </html>
+            `);
+
+            const listaResultados = nuevaVentana.document.getElementById('lista-resultados');
+            if (resultadosGuardados.length === 0) {
+                listaResultados.innerHTML = '<li>Aún no has completado ninguna partida.</li>';
+            } else {
+                resultadosGuardados.forEach((res, index) => {
+                    const li = nuevaVentana.document.createElement('li');
+                    li.textContent = `Partida ${index + 1}: ${res}`;
+                    listaResultados.appendChild(li);
+                });
+            }
+        }
+
         function cambiarColores() {
             const recuadros = document.querySelectorAll('.recuadro');
             recuadros.forEach(recuadro => {
-                const r = Math.floor(Math.random() * 76) + 180; // 180-255
-                const g = Math.floor(Math.random() * 101) + 100; // 100-200
-                const b = Math.floor(Math.random() * 51); // 0-50
+                const r = Math.floor(Math.random() * 76) + 180;
+                const g = Math.floor(Math.random() * 101) + 100;
+                const b = Math.floor(Math.random() * 51);
                 recuadro.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
                 recuadro.style.color = '#fff';
             });
         }
 
-        // --- Eventos de los botones ---
         reiniciarBtn.addEventListener('click', reiniciarJuego);
-        cambiarBtn.addEventListener('click', () => {
-            reiniciarJuego();
-            crearCuadricula();
-        });
+        cambiarBtn.addEventListener('click', reiniciarJuego);
         coloresBtn.addEventListener('click', cambiarColores);
-        
-        // Clic en la cuadrícula para iniciar el cronómetro
-        cuadriculaElemento.addEventListener('click', iniciarCronometro);
+        resultadosBtn.addEventListener('click', mostrarResultados);
 
-        // Inicializar el juego
-        crearCuadricula();
+        reiniciarJuego();
     </script>
 </body>
 </html>
