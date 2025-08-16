@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GridMind</title>
     <style>
+        /* Estilos generales */
         body {
             font-family: Arial, sans-serif;
             display: flex;
@@ -16,29 +17,51 @@
             background-color: #f4f4f4;
             color: #333;
         }
+
+        /* Contenedores de pantalla */
+        .pantalla {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            max-width: 600px;
+        }
+        .pantalla.activa {
+            display: flex;
+        }
+
+        /* Título del temporizador */
         #cronometro {
             font-size: 3em;
             margin-bottom: 20px;
+            text-align: center;
         }
+
+        /* Cuadrícula del juego */
         #cuadricula {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            grid-template-rows: repeat(6, 80px);
+            grid-template-rows: repeat(6, 1fr);
             gap: 5px;
-            margin-bottom: 20px;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: #fcfcfc;
             border: 2px solid #333;
             border-radius: 10px;
-            padding: 20px;
-            background-color: #fcfcfc;
-            max-width: 90%;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+
+        /* Recuadros individuales */
         .recuadro {
-            aspect-ratio: 1 / 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3em;
+            font-size: 2em;
             font-weight: bold;
             border: 2px solid #333;
             cursor: pointer;
@@ -48,44 +71,118 @@
             transform: scale(1.05);
         }
         .correcto {
-            background-color: #4CAF50; /* Verde */
+            background-color: #4CAF50;
             color: white;
-            pointer-events: none; /* Deshabilita clics en los números correctos */
+            pointer-events: none;
         }
-        #botones {
+
+        /* Contenedor de botones */
+        #botones, #botones-resultados {
             display: flex;
-            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            width: 100%;
         }
+
+        /* Estilo de los botones MEJORADO */
         .boton {
-            padding: 10px 20px;
+            padding: 12px 20px;
             font-size: 1em;
             cursor: pointer;
-            border: 1px solid #333;
-            border-radius: 5px;
-            background-color: #ddd;
+            border: none; /* Quitamos el borde para un diseño más limpio */
+            border-radius: 8px; /* Bordes más redondeados */
+            font-weight: bold;
+            color: white;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
+        /* Colores de botones específicos */
+        #reiniciarBtn, #cambiarBtn, #reiniciarDesdeResultadosBtn {
+            background-color: #f44336; /* Rojo oscuro */
+        }
+        #coloresBtn {
+            background-color: #2196F3; /* Azul */
+        }
+        #resultadosBtn, #volverBtn {
+            background-color: #009688; /* Verde azulado */
+        }
+        
+        /* Efecto hover */
+        .boton:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Mensajes de juego */
         #mensaje {
-            font-size: 1.5em;
+            font-size: 1.2em;
             margin-top: 20px;
             font-weight: bold;
             text-align: center;
         }
+        
+        /* Pantalla de resultados */
+        #resultados-pantalla {
+            text-align: center;
+        }
+        #resultados-pantalla h2 {
+            font-size: 2em;
+        }
+        #lista-resultados {
+            list-style-type: none;
+            padding: 0;
+            width: 100%;
+            margin-top: 20px;
+        }
+        #lista-resultados li {
+            background-color: #fff;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Ajustes para pantallas grandes */
+        @media (min-width: 600px) {
+            .recuadro {
+                font-size: 3em;
+            }
+        }
     </style>
 </head>
 <body>
-    <div id="contenedor-principal">
-        <div id="cronometro">00:00</div>
-        <div id="cuadricula"></div>
-        <div id="mensaje"></div>
-        <div id="botones">
-            <button id="reiniciarBtn" class="boton">Reiniciar</button>
-            <button id="cambiarBtn" class="boton">Nueva Partida</button>
-            <button id="coloresBtn" class="boton">Colores</button>
-            <button id="resultadosBtn" class="boton">Resultados</button>
+    <div id="juego-pantalla" class="pantalla activa">
+        <div id="contenedor-principal">
+            <div id="cronometro">00:00</div>
+            <div id="cuadricula"></div>
+            <div id="mensaje"></div>
+            <div id="botones">
+                <button id="reiniciarBtn" class="boton">Reiniciar</button>
+                <button id="cambiarBtn" class="boton">Nueva Partida</button>
+                <button id="coloresBtn" class="boton">Colores</button>
+                <button id="resultadosBtn" class="boton">Resultados</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="resultados-pantalla" class="pantalla">
+        <h2>Tus Resultados</h2>
+        <ul id="lista-resultados"></ul>
+        <div id="botones-resultados">
+            <button id="volverBtn" class="boton">Volver al Juego</button>
+            <button id="reiniciarDesdeResultadosBtn" class="boton">Nueva Partida</button>
         </div>
     </div>
 
     <script>
+        const juegoPantalla = document.getElementById('juego-pantalla');
+        const resultadosPantalla = document.getElementById('resultados-pantalla');
         const cronometroElemento = document.getElementById('cronometro');
         const cuadriculaElemento = document.getElementById('cuadricula');
         const reiniciarBtn = document.getElementById('reiniciarBtn');
@@ -93,12 +190,26 @@
         const coloresBtn = document.getElementById('coloresBtn');
         const resultadosBtn = document.getElementById('resultadosBtn');
         const mensajeElemento = document.getElementById('mensaje');
+        const volverBtn = document.getElementById('volverBtn');
+        const reiniciarDesdeResultadosBtn = document.getElementById('reiniciarDesdeResultadosBtn');
+        const listaResultadosElemento = document.getElementById('lista-resultados');
 
         let tiempoTranscurrido = 0;
         let intervaloCronometro;
         let siguienteNumero = 1;
 
         let resultados = JSON.parse(localStorage.getItem('juegoNumerosResultados')) || [];
+
+        function mostrarJuego() {
+            juegoPantalla.classList.add('activa');
+            resultadosPantalla.classList.remove('activa');
+        }
+
+        function mostrarResultados() {
+            juegoPantalla.classList.remove('activa');
+            resultadosPantalla.classList.add('activa');
+            actualizarListaResultados();
+        }
 
         function generarNumeros() {
             const numeros = Array.from({length: 36}, (_, i) => i + 1);
@@ -144,11 +255,11 @@
             siguienteNumero = 1;
             mensajeElemento.textContent = "";
             crearCuadricula();
+            mostrarJuego();
         }
         
         function manejarClic(recuadro, numero) {
             iniciarCronometro();
-
             if (numero === siguienteNumero) {
                 recuadro.classList.add('correcto');
                 siguienteNumero++;
@@ -165,52 +276,17 @@
             localStorage.setItem('juegoNumerosResultados', JSON.stringify(resultados));
         }
 
-        function mostrarResultados() {
-            const nuevaVentana = window.open('', '_blank', 'width=400,height=500');
+        function actualizarListaResultados() {
             const resultadosGuardados = JSON.parse(localStorage.getItem('juegoNumerosResultados')) || [];
+            listaResultadosElemento.innerHTML = '';
 
-            nuevaVentana.document.write(`
-                <!DOCTYPE html>
-                <html lang="es">
-                <head>
-                    <title>Resultados del Juego</title>
-                    <style>
-                        body {
-                            font-family: Arial, sans-serif;
-                            padding: 20px;
-                            text-align: center;
-                        }
-                        h2 {
-                            color: #333;
-                        }
-                        ul {
-                            list-style-type: none;
-                            padding: 0;
-                        }
-                        li {
-                            background-color: #f0f0f0;
-                            margin: 5px 0;
-                            padding: 10px;
-                            border-radius: 5px;
-                            font-weight: bold;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <h2>Tus Resultados</h2>
-                    <ul id="lista-resultados"></ul>
-                </body>
-                </html>
-            `);
-
-            const listaResultados = nuevaVentana.document.getElementById('lista-resultados');
             if (resultadosGuardados.length === 0) {
-                listaResultados.innerHTML = '<li>Aún no has completado ninguna partida.</li>';
+                listaResultadosElemento.innerHTML = '<li>Aún no has completado ninguna partida.</li>';
             } else {
                 resultadosGuardados.forEach((res, index) => {
-                    const li = nuevaVentana.document.createElement('li');
+                    const li = document.createElement('li');
                     li.textContent = `Partida ${index + 1}: ${res}`;
-                    listaResultados.appendChild(li);
+                    listaResultadosElemento.appendChild(li);
                 });
             }
         }
@@ -230,6 +306,8 @@
         cambiarBtn.addEventListener('click', reiniciarJuego);
         coloresBtn.addEventListener('click', cambiarColores);
         resultadosBtn.addEventListener('click', mostrarResultados);
+        volverBtn.addEventListener('click', mostrarJuego);
+        reiniciarDesdeResultadosBtn.addEventListener('click', reiniciarJuego);
 
         reiniciarJuego();
     </script>
