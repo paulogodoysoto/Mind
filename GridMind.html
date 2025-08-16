@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GridMind</title>
+    <link rel="icon" href="image.png" type="image/png">
     <style>
         /* Estilos generales */
         body {
@@ -132,8 +133,8 @@
         #resultadosBtn {
             background-color: #009688;
         }
-        #accesoDirectoBtn {
-            background-color: #6c757d;
+        #compartirBtn {
+            background-color: #008CBA;
         }
         
         /* Efecto hover */
@@ -208,7 +209,7 @@
                 <button id="reiniciarBtn" class="boton">Reiniciar</button>
                 <button id="nivelesBtn" class="boton">Niveles</button>
                 <button id="resultadosBtn" class="boton">Resultados</button>
-                <button id="accesoDirectoBtn" class="boton boton-pequeno">Crear Acceso</button>
+                <button id="compartirBtn" class="boton boton-pequeno">Compartir</button>
             </div>
         </div>
     </div>
@@ -250,7 +251,7 @@
         const nivel2Btn = document.getElementById('nivel2Btn');
         const nivel3Btn = document.getElementById('nivel3Btn');
         const volverNivelesBtn = document.getElementById('volverNivelesBtn');
-        const accesoDirectoBtn = document.getElementById('accesoDirectoBtn');
+        const compartirBtn = document.getElementById('compartirBtn');
 
         let tiempoTranscurrido = 0;
         let intervaloCronometro;
@@ -435,16 +436,20 @@
                 });
             }
         }
-
-        function crearAccesoDirecto() {
-            const url = window.location.href;
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'GridMind.html';
-            link.style.display = 'none';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        
+        function compartirJuego() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'GridMind',
+                    text: '¡Desafía tu mente con GridMind! Un juego de agilidad mental y destreza con los números.',
+                    url: window.location.href
+                }).then(() => {
+                    console.log('Juego compartido con éxito');
+                }).catch(console.error);
+            } else {
+                // Mensaje de respaldo si la API no está disponible
+                alert('Tu navegador no soporta la función de compartir. Puedes copiar y pegar la URL para compartir el juego.');
+            }
         }
 
 
@@ -455,7 +460,7 @@
         volverBtn.addEventListener('click', mostrarJuego);
         volverNivelesBtn.addEventListener('click', mostrarJuego);
         reiniciarDesdeResultadosBtn.addEventListener('click', iniciarNuevaPartida);
-        accesoDirectoBtn.addEventListener('click', crearAccesoDirecto);
+        compartirBtn.addEventListener('click', compartirJuego);
 
         nivel1Btn.addEventListener('click', () => {
             nivelActual = 1;
