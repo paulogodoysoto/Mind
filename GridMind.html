@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Números</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        #cronometro {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        #cuadricula {
+            display: grid;
+            grid-template-columns: repeat(6, 80px);
+            grid-template-rows: repeat(6, 80px);
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .recuadro {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+            border: 2px solid #333;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.5s;
+        }
+        .recuadro:hover {
+            transform: scale(1.05);
+        }
+        #botones {
+            display: flex;
+            gap: 15px;
+        }
+        .boton {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border: 1px solid #333;
+            border-radius: 5px;
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div id="cronometro">00:00</div>
+    <div id="cuadricula"></div>
+    <div id="botones">
+        <button id="reiniciarBtn" class="boton">Reiniciar</button>
+        <button id="cambiarBtn" class="boton">Nueva Partida</button>
+        <button id="coloresBtn" class="boton">Colores</button>
+    </div>
+
+    <script>
+        // --- Variables del juego ---
+        const cronometroElemento = document.getElementById('cronometro');
+        const cuadriculaElemento = document.getElementById('cuadricula');
+        const reiniciarBtn = document.getElementById('reiniciarBtn');
+        const cambiarBtn = document.getElementById('cambiarBtn');
+        const coloresBtn = document.getElementById('coloresBtn');
+
+        let cronometro;
+        let tiempoTranscurrido = 0;
+        let intervaloCronometro;
+        
+        // --- Lógica del juego ---
+        function generarNumeros() {
+            const numeros = Array.from({length: 36}, (_, i) => i + 1);
+            for (let i = numeros.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [numeros[i], numeros[j]] = [numeros[j], numeros[i]];
+            }
+            return numeros;
+        }
+
+        function crearCuadricula() {
+            cuadriculaElemento.innerHTML = '';
+            const numeros = generarNumeros();
+            numeros.forEach(numero => {
+                const recuadro = document.createElement('div');
+                recuadro.className = 'recuadro';
+                recuadro.textContent = numero;
+                cuadriculaElemento.appendChild(recuadro);
+            });
+        }
+        
+        function iniciarCronometro() {
+            if (!cronometro) {
+                tiempoTranscurrido = 0;
+                cronometro = true;
+                intervaloCronometro = setInterval(() => {
+                    tiempoTranscurrido++;
+                    if (tiempoTranscurrido > 180) { // 3 minutos
+                        tiempoTranscurrido = 180;
+                        pararCronometro();
+                    }
+                    const minutos = Math.floor(tiempoTranscurrido / 60).toString().padStart(2, '0');
+                    const segundos = (tiempoTranscurrido % 60).toString().padStart(2, '0');
+                    cronometroElemento.textContent = `${minutos}:${segundos}`;
+                }, 1000);
+            }
+        }
+        
+        function pararCronometro() {
+            clearInterval(intervaloCronometro);
+            cronometro = false;
+        }
+
+        function reiniciarJuego() {
+            pararCronometro();
+            cronometroElemento.textContent = "00:00";
+        }
+        
+        function cambiarColores() {
+            const recuadros = document.querySelectorAll('.recuadro');
+            recuadros.forEach(recuadro => {
+                const r = Math.floor(Math.random() * 76) + 180; // 180-255
+                const g = Math.floor(Math.random() * 101) + 100; // 100-200
+                const b = Math.floor(Math.random() * 51); // 0-50
+                recuadro.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+                recuadro.style.color = '#fff';
+            });
+        }
+
+        // --- Eventos de los botones ---
+        reiniciarBtn.addEventListener('click', reiniciarJuego);
+        cambiarBtn.addEventListener('click', () => {
+            reiniciarJuego();
+            crearCuadricula();
+        });
+        coloresBtn.addEventListener('click', cambiarColores);
+        
+        // Clic en la cuadrícula para iniciar el cronómetro
+        cuadriculaElemento.addEventListener('click', iniciarCronometro);
+
+        // Inicializar el juego
+        crearCuadricula();
+    </script>
+</body>
+</html>
