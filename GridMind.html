@@ -33,10 +33,19 @@
             display: flex;
         }
 
-        /* Título del temporizador */
+        /* Título del temporizador y recuadro */
+        #cronometro-contenedor {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            background-color: #fcfcfc;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
         #cronometro {
             font-size: 3em;
-            margin-bottom: 20px;
             text-align: center;
         }
 
@@ -100,8 +109,8 @@
             border-radius: 8px;
             font-weight: bold;
             color: white;
-            transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Transición para la sombra también */
-            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2); /* Sombra aumentada */
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         /* Colores de botones específicos */
@@ -122,7 +131,7 @@
         .boton:hover {
             opacity: 0.9;
             transform: scale(1.02);
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3); /* Sombra aún más pronunciada en hover */
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
         }
 
         /* Mensajes de juego */
@@ -166,7 +175,7 @@
 
         /* Espacio para el botón de volver de niveles */
         #volverNivelesBtn {
-            margin-top: 20px; /* Separación del botón de niveles */
+            margin-top: 20px;
         }
 
         /* Ajustes para pantallas grandes */
@@ -180,7 +189,9 @@
 <body>
     <div id="juego-pantalla" class="pantalla activa">
         <div id="contenedor-principal">
-            <div id="cronometro">00:00</div>
+            <div id="cronometro-contenedor">
+                <div id="cronometro">00:00</div>
+            </div>
             <div id="cuadricula"></div>
             <div id="mensaje"></div>
             <div id="botones">
@@ -236,10 +247,8 @@
         let nivelActual = 1;
         let coloresNivel3 = {};
 
-        // Cargar resultados desde localStorage al inicio
         let resultados = JSON.parse(localStorage.getItem('juegoNumerosResultados')) || [];
 
-        // --- Funciones de visualización de pantallas ---
         function mostrarJuego() {
             juegoPantalla.classList.add('activa');
             resultadosPantalla.classList.remove('activa');
@@ -259,7 +268,6 @@
             nivelesPantalla.classList.add('activa');
         }
 
-        // --- Lógica del juego ---
         function generarNumeros() {
             const numeros = Array.from({length: 36}, (_, i) => i + 1);
             for (let i = numeros.length - 1; i > 0; i--) {
@@ -333,13 +341,13 @@
                 siguienteNumero++;
                 if (siguienteNumero > 36) {
                     pararCronometro();
-                    mensajeElemento.textContent = `¡Felicitaciones! Completaste el Nivel ${nivelActual} en ${cronometroElemento.textContent}.`;
-                    guardarResultado(cronometroElemento.textContent, nivelActual);
+                    const tiempoFinal = cronometroElemento.textContent;
+                    mensajeElemento.textContent = `¡Felicitaciones! Completaste el Nivel ${nivelActual} en ${tiempoFinal}.`;
+                    guardarResultado(tiempoFinal, nivelActual);
                 }
             }
         }
 
-        // --- Funciones para resultados y localStorage ---
         function guardarResultado(tiempo, nivel) {
             const resultado = { tiempo: tiempo, nivel: nivel };
             resultados.push(resultado);
@@ -372,7 +380,6 @@
             }
         }
 
-        // --- Eventos de los botones ---
         reiniciarBtn.addEventListener('click', reiniciarJuego);
         cambiarBtn.addEventListener('click', reiniciarJuego);
         resultadosBtn.addEventListener('click', mostrarResultados);
@@ -394,7 +401,6 @@
             reiniciarJuego();
         });
 
-        // Inicializar el juego
         reiniciarJuego();
         actualizarListaResultados();
     </script>
