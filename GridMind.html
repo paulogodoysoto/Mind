@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GridMind</title>
+    
     <link rel="icon" href="GridMind_logo.png" type="image/png">
+
+    <link rel="apple-touch-icon" href="GridMind_logo.png">
+
+    <link rel="manifest" href="manifest.json">
+
     <style>
         /* Estilos generales */
         body {
@@ -259,7 +265,7 @@
         let nivelActual = 1;
         let coloresNivel3 = {};
         let numerosCuadricula = [];
-        let juegoTerminado = false; // Nueva variable para saber si el juego ha terminado
+        let juegoTerminado = false;
 
         let resultados = JSON.parse(localStorage.getItem('juegoNumerosResultados')) || [];
 
@@ -360,7 +366,7 @@
             cronometroElemento.style.color = "#A3D9A3";
             siguienteNumero = 1;
             mensajeElemento.textContent = "";
-            juegoTerminado = false; // Reiniciar el estado del juego
+            juegoTerminado = false;
             
             const recuadros = document.querySelectorAll('.recuadro');
             recuadros.forEach(recuadro => {
@@ -382,7 +388,7 @@
             cronometroElemento.style.color = "#A3D9A3";
             siguienteNumero = 1;
             mensajeElemento.textContent = "";
-            juegoTerminado = false; // Reiniciar el estado del juego
+            juegoTerminado = false;
             crearCuadricula(false);
             mostrarJuego();
         }
@@ -401,7 +407,7 @@
                 siguienteNumero++;
                 if (siguienteNumero > 36) {
                     pararCronometro();
-                    juegoTerminado = true; // El juego ha terminado
+                    juegoTerminado = true;
                     const tiempoFinal = cronometroElemento.textContent;
                     mensajeElemento.textContent = `¡Felicitaciones! Completaste el Nivel ${nivelActual} en ${tiempoFinal}.`;
                     guardarResultado(tiempoFinal, nivelActual);
