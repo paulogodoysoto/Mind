@@ -239,7 +239,7 @@
         const listaResultadosElemento = document.getElementById('lista-resultados');
         const nivel1Btn = document.getElementById('nivel1Btn');
         const nivel2Btn = document.getElementById('nivel2Btn');
-        const nivel3Btn = document = document.getElementById('nivel3Btn');
+        const nivel3Btn = document.getElementById('nivel3Btn');
         const volverNivelesBtn = document.getElementById('volverNivelesBtn');
 
         let tiempoTranscurrido = 0;
@@ -313,22 +313,21 @@
                     const segundos = (tiempoTranscurrido % 60).toString().padStart(2, '0');
                     cronometroElemento.textContent = `${minutos}:${segundos}`;
                     
-                    // Lógica para el cambio de color
                     let r, g, b;
-                    if (tiempoTranscurrido <= 60) {
-                        const progress = tiempoTranscurrido / 60;
-                        r = Math.floor(180 + 75 * progress);
-                        g = 255;
-                        b = Math.floor(163 - 163 * progress);
-                    } else if (tiempoTranscurrido <= 120) {
-                        const progress = (tiempoTranscurrido - 60) / 60;
-                        r = 255;
-                        g = Math.floor(255 - 100 * progress);
-                        b = 0;
+                    if (tiempoTranscurrido <= 30) {
+                        const progress = tiempoTranscurrido / 30;
+                        r = Math.floor(163 - (163 - 85) * progress);
+                        g = Math.floor(217 - (217 - 107) * progress);
+                        b = Math.floor(163 - (163 - 48) * progress);
+                    } else if (tiempoTranscurrido <= 60) {
+                        const progress = (tiempoTranscurrido - 30) / 30;
+                        r = Math.floor(85 + (255 - 85) * progress);
+                        g = Math.floor(107 + (255 - 107) * progress);
+                        b = 48 - Math.floor(48 * progress);
                     } else {
-                        const progress = (tiempoTranscurrido - 120) / 60;
+                        const progress = (tiempoTranscurrido - 60) / 120;
                         r = 255;
-                        g = Math.floor(155 - 155 * progress);
+                        g = Math.floor(255 - (255 * progress));
                         b = 0;
                     }
                     cronometroElemento.style.color = `rgb(${r}, ${g}, ${b})`;
