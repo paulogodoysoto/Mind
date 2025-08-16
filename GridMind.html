@@ -40,6 +40,19 @@
             display: flex;
         }
 
+        /* Título de la pantalla de inicio */
+        #inicio-pantalla h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            color: #2196F3;
+        }
+        #inicio-pantalla p {
+            font-size: 1.2em;
+            text-align: center;
+            max-width: 400px;
+            margin: 10px 0 20px;
+        }
+
         /* Título del temporizador y recuadro */
         #cronometro-contenedor {
             display: flex;
@@ -106,7 +119,7 @@
         }
 
         /* Contenedor de botones */
-        #botones, #botones-resultados, #botones-niveles {
+        #botones, #botones-resultados, #botones-niveles, #botones-inicio {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
@@ -140,7 +153,7 @@
         #cambiarBtn, #reiniciarDesdeResultadosBtn {
             background-color: #dc3545;
         }
-        #nivelesBtn, #nivel1Btn, #nivel2Btn, #nivel3Btn {
+        #nivelesBtn, #nivel1Btn, #nivel2Btn, #nivel3Btn, #jugarBtn {
             background-color: #2196F3;
         }
         #resultadosBtn {
@@ -210,7 +223,15 @@
     </style>
 </head>
 <body>
-    <div id="juego-pantalla" class="pantalla activa">
+    <div id="inicio-pantalla" class="pantalla activa">
+        <h1>GridMind</h1>
+        <p>¡Entrena tu concentración y agilidad mental encontrando los números en orden!</p>
+        <div id="botones-inicio">
+            <button id="jugarBtn" class="boton">Jugar</button>
+        </div>
+    </div>
+
+    <div id="juego-pantalla" class="pantalla">
         <div id="contenedor-principal">
             <div id="cronometro-contenedor">
                 <div id="cronometro">00:00</div>
@@ -248,6 +269,7 @@
     </div>
 
     <script>
+        const inicioPantalla = document.getElementById('inicio-pantalla');
         const juegoPantalla = document.getElementById('juego-pantalla');
         const resultadosPantalla = document.getElementById('resultados-pantalla');
         const nivelesPantalla = document.getElementById('niveles-pantalla');
@@ -266,6 +288,7 @@
         const nivel3Btn = document.getElementById('nivel3Btn');
         const volverNivelesBtn = document.getElementById('volverNivelesBtn');
         const compartirBtn = document.getElementById('compartirBtn');
+        const jugarBtn = document.getElementById('jugarBtn');
 
         let tiempoTranscurrido = 0;
         let intervaloCronometro;
@@ -278,13 +301,22 @@
 
         let resultados = JSON.parse(localStorage.getItem('juegoNumerosResultados')) || [];
 
+        function mostrarInicio() {
+            inicioPantalla.classList.add('activa');
+            juegoPantalla.classList.remove('activa');
+            resultadosPantalla.classList.remove('activa');
+            nivelesPantalla.classList.remove('activa');
+        }
+
         function mostrarJuego() {
+            inicioPantalla.classList.remove('activa');
             juegoPantalla.classList.add('activa');
             resultadosPantalla.classList.remove('activa');
             nivelesPantalla.classList.remove('activa');
         }
 
         function mostrarResultados() {
+            inicioPantalla.classList.remove('activa');
             juegoPantalla.classList.remove('activa');
             resultadosPantalla.classList.add('activa');
             nivelesPantalla.classList.remove('activa');
@@ -292,6 +324,7 @@
         }
 
         function mostrarNiveles() {
+            inicioPantalla.classList.remove('activa');
             juegoPantalla.classList.remove('activa');
             resultadosPantalla.classList.remove('activa');
             nivelesPantalla.classList.add('activa');
@@ -510,7 +543,8 @@
             }
         }
 
-
+        // --- Event Listeners ---
+        jugarBtn.addEventListener('click', iniciarNuevaPartida);
         reiniciarBtn.addEventListener('click', reiniciarJuegoActual);
         cambiarBtn.addEventListener('click', iniciarNuevaPartida);
         resultadosBtn.addEventListener('click', mostrarResultados);
@@ -533,7 +567,6 @@
             iniciarNuevaPartida();
         });
 
-        iniciarNuevaPartida();
     </script>
 </body>
 </html>
