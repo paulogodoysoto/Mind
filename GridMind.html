@@ -247,11 +247,10 @@
         let siguienteNumero = 1;
         let nivelActual = 1;
         let coloresNivel3 = {};
+        let numerosCuadricula = [];
 
-        // Cargar resultados desde localStorage al inicio
         let resultados = JSON.parse(localStorage.getItem('juegoNumerosResultados')) || [];
 
-        // --- Funciones de visualización de pantallas ---
         function mostrarJuego() {
             juegoPantalla.classList.add('activa');
             resultadosPantalla.classList.remove('activa');
@@ -271,7 +270,6 @@
             nivelesPantalla.classList.add('activa');
         }
 
-        // --- Lógica del juego ---
         function generarNumeros() {
             const numeros = Array.from({length: 36}, (_, i) => i + 1);
             for (let i = numeros.length - 1; i > 0; i--) {
@@ -281,11 +279,13 @@
             return numeros;
         }
 
-        function crearCuadricula() {
+        function crearCuadricula(mantenerNumeros = false) {
             cuadriculaElemento.innerHTML = '';
-            const numeros = generarNumeros();
+            if (!mantenerNumeros || numerosCuadricula.length === 0) {
+                numerosCuadricula = generarNumeros();
+            }
             coloresNivel3 = {};
-            numeros.forEach(numero => {
+            numerosCuadricula.forEach(numero => {
                 const recuadro = document.createElement('div');
                 recuadro.className = 'recuadro';
                 recuadro.textContent = numero;
@@ -313,17 +313,28 @@
                     const segundos = (tiempoTranscurrido % 60).toString().padStart(2, '0');
                     cronometroElemento.textContent = `${minutos}:${segundos}`;
                     
-                    // Lógica para cambiar el color del cronómetro
-                    let colorValue = 0;
-                    if (tiempoTranscurrido <= 180) { // Hasta 3 minutos
-                        colorValue = Math.floor(tiempoTranscurrido * 255 / 180);
-                    } else { // Después de 3 minutos, el color es rojo intenso
-                        colorValue = 255;
+                    // Lógica para el cambio de color
+                    let r, g, b;
+                    if (tiempoTranscurrido <= 30) {
+                        const greenValue = Math.floor(tiempoTranscurrido * 255 / 30);
+                        r = Math.floor(255 - greenValue * 0.5);
+                        g = 255;
+                        b = Math.floor(255 - greenValue * 0.5);
+                    } else if (tiempoTranscurrido <= 60) {
+                        const progress = (tiempoTranscurrido - 30) / 30;
+                        r = Math.floor(255 * progress);
+                        g = 255;
+                        b = 0;
+                    } else if (tiempoTranscurrido <= 180) {
+                        const progress = (tiempoTranscurrido - 60) / 120;
+                        r = 255;
+                        g = Math.floor(255 * (1 - progress));
+                        b = 0;
+                    } else {
+                        r = 255;
+                        g = 0;
+                        b = 0;
                     }
-                    
-                    const r = 255;
-                    const g = 255 - colorValue;
-                    const b = 255 - colorValue;
                     cronometroElemento.style.color = `rgb(${r}, ${g}, ${b})`;
                 }, 1000);
             }
@@ -334,14 +345,35 @@
             intervaloCronometro = null;
         }
         
-        function reiniciarJuego() {
+        function reiniciarJuegoActual() {
             pararCronometro();
             tiempoTranscurrido = 0;
             cronometroElemento.textContent = "00:00";
-            cronometroElemento.style.color = "#666"; // Restablece el color inicial
+            cronometroElemento.style.color = "#666";
             siguienteNumero = 1;
             mensajeElemento.textContent = "";
-            crearCuadricula();
+            
+            const recuadros = document.querySelectorAll('.recuadro');
+            recuadros.forEach(recuadro => {
+                if (recuadro.classList.contains('correcto')) {
+                    recuadro.classList.remove('correcto');
+                }
+                if (nivelActual === 3) {
+                    recuadro.style.backgroundColor = coloresNivel3[recuadro.textContent];
+                }
+            });
+
+            mostrarJuego();
+        }
+
+        function iniciarNuevaPartida() {
+            pararCronometro();
+            tiempoTranscurrido = 0;
+            cronometroElemento.textContent = "00:00";
+            cronometroElemento.style.color = "#666";
+            siguienteNumero = 1;
+            mensajeElemento.textContent = "";
+            crearCuadricula(false);
             mostrarJuego();
         }
         
@@ -367,10 +399,8 @@
         }
 
         function guardarResultado(tiempo, nivel) {
-            const resultado = { tiempo: tiempo, nivel: nivel };
-            // Aseguramos que 'resultados' esté actualizado
             let resultadosGuardados = JSON.parse(localStorage.getItem('juegoNumerosResultados')) || [];
-            resultadosGuardados.push(resultado);
+            resultadosGuardados.push({ tiempo, nivel });
             localStorage.setItem('juegoNumerosResultados', JSON.stringify(resultadosGuardados));
         }
 
@@ -400,28 +430,29 @@
             }
         }
 
-        reiniciarBtn.addEventListener('click', reiniciarJuego);
-        cambiarBtn.addEventListener('click', reiniciarJuego);
+        reiniciarBtn.addEventListener('click', reiniciarJuegoActual);
+        cambiarBtn.addEventListener('click', iniciarNuevaPartida);
         resultadosBtn.addEventListener('click', mostrarResultados);
         nivelesBtn.addEventListener('click', mostrarNiveles);
         volverBtn.addEventListener('click', mostrarJuego);
         volverNivelesBtn.addEventListener('click', mostrarJuego);
-        reiniciarDesdeResultadosBtn.addEventListener('click', reiniciarJuego);
+        reiniciarDesdeResultadosBtn.addEventListener('click', iniciarNuevaPartida);
 
         nivel1Btn.addEventListener('click', () => {
             nivelActual = 1;
-            reiniciarJuego();
+            iniciarNuevaPartida();
         });
         nivel2Btn.addEventListener('click', () => {
             nivelActual = 2;
-            reiniciarJuego();
+            iniciarNuevaPartida();
         });
         nivel3Btn.addEventListener('click', () => {
             nivelActual = 3;
-            reiniciarJuego();
+            iniciarNuevaPartida();
         });
 
-        reiniciarJuego();
+        // Inicializar el juego
+        iniciarNuevaPartida();
     </script>
 </body>
 </html>
