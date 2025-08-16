@@ -315,17 +315,20 @@
                     
                     let r, g, b;
                     if (tiempoTranscurrido <= 30) {
+                        // Fase 1: Verde pastel a verde más oscuro
                         const progress = tiempoTranscurrido / 30;
                         r = Math.floor(163 - (163 - 85) * progress);
                         g = Math.floor(217 - (217 - 107) * progress);
                         b = Math.floor(163 - (163 - 48) * progress);
-                    } else if (tiempoTranscurrido <= 60) {
-                        const progress = (tiempoTranscurrido - 30) / 30;
+                    } else if (tiempoTranscurrido <= 40) {
+                        // Fase 2: Verde a amarillo
+                        const progress = (tiempoTranscurrido - 30) / 10;
                         r = Math.floor(85 + (255 - 85) * progress);
                         g = Math.floor(107 + (255 - 107) * progress);
                         b = 48 - Math.floor(48 * progress);
                     } else {
-                        const progress = (tiempoTranscurrido - 60) / 120;
+                        // Fase 3: Amarillo a rojo (tonos de llama)
+                        const progress = (tiempoTranscurrido - 40) / 140;
                         r = 255;
                         g = Math.floor(255 - (255 * progress));
                         b = 0;
