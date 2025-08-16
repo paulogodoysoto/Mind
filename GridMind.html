@@ -57,6 +57,13 @@
             color: #A3D9A3; /* Color inicial del cronómetro (verde pastel) */
         }
 
+        /* Instrucciones del juego */
+        #instrucciones {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
         /* Cuadrícula del juego */
         #cuadricula {
             display: grid;
@@ -208,6 +215,7 @@
             <div id="cronometro-contenedor">
                 <div id="cronometro">00:00</div>
             </div>
+            <div id="instrucciones">Haz clic en los números en orden ascendente (1, 2, 3...)</div>
             <div id="cuadricula"></div>
             <div id="mensaje"></div>
             <div id="botones">
@@ -412,9 +420,8 @@
                     pararCronometro();
                     juegoTerminado = true;
                     puntuacionFinal = calcularPuntuacion();
-                    const rango = obtenerRango(puntuacionFinal);
                     const tiempoFinal = cronometroElemento.textContent;
-                    mensajeElemento.textContent = `¡Felicitaciones! Completaste el Nivel ${nivelActual} en ${tiempoFinal} con una Puntuación GridMind de ${puntuacionFinal.toFixed(0)} (${rango}).`;
+                    mensajeElemento.innerHTML = `¡Juego completado!<br>Nivel ${nivelActual} en ${tiempoFinal}.<br>Puntuación GridMind: ${puntuacionFinal.toFixed(0)}`;
                     guardarResultado(tiempoFinal, nivelActual, puntuacionFinal);
                 }
             }
