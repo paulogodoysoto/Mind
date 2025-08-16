@@ -76,8 +76,13 @@
             pointer-events: none;
         }
 
+        .nivel-3-color {
+            color: white;
+            border: none;
+        }
+
         /* Contenedor de botones */
-        #botones, #botones-resultados {
+        #botones, #botones-resultados, #botones-niveles {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
@@ -86,13 +91,13 @@
             width: 100%;
         }
 
-        /* Estilo de los botones MEJORADO */
+        /* Estilo de los botones */
         .boton {
             padding: 12px 20px;
             font-size: 1em;
             cursor: pointer;
-            border: none; /* Quitamos el borde para un diseño más limpio */
-            border-radius: 8px; /* Bordes más redondeados */
+            border: none;
+            border-radius: 8px;
             font-weight: bold;
             color: white;
             transition: background-color 0.3s ease;
@@ -101,13 +106,13 @@
 
         /* Colores de botones específicos */
         #reiniciarBtn, #cambiarBtn, #reiniciarDesdeResultadosBtn {
-            background-color: #f44336; /* Rojo oscuro */
+            background-color: #f44336;
         }
-        #coloresBtn {
-            background-color: #2196F3; /* Azul */
+        #nivelesBtn {
+            background-color: #2196F3;
         }
-        #resultadosBtn, #volverBtn {
-            background-color: #009688; /* Verde azulado */
+        #resultadosBtn, #volverBtn, #nivel1Btn, #nivel2Btn, #nivel3Btn {
+            background-color: #009688;
         }
         
         /* Efecto hover */
@@ -148,6 +153,14 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
+        /* Pantalla de niveles */
+        #niveles-pantalla {
+            text-align: center;
+        }
+        #niveles-pantalla h2 {
+            font-size: 2em;
+        }
+
         /* Ajustes para pantallas grandes */
         @media (min-width: 600px) {
             .recuadro {
@@ -165,7 +178,7 @@
             <div id="botones">
                 <button id="reiniciarBtn" class="boton">Reiniciar</button>
                 <button id="cambiarBtn" class="boton">Nueva Partida</button>
-                <button id="coloresBtn" class="boton">Colores</button>
+                <button id="nivelesBtn" class="boton">Niveles</button>
                 <button id="resultadosBtn" class="boton">Resultados</button>
             </div>
         </div>
@@ -180,37 +193,64 @@
         </div>
     </div>
 
+    <div id="niveles-pantalla" class="pantalla">
+        <h2>Selecciona un Nivel</h2>
+        <div id="botones-niveles">
+            <button id="nivel1Btn" class="boton">Nivel 1</button>
+            <button id="nivel2Btn" class="boton">Nivel 2</button>
+            <button id="nivel3Btn" class="boton">Nivel 3</button>
+        </div>
+        <button id="volverNivelesBtn" class="boton">Volver</button>
+    </div>
+
     <script>
         const juegoPantalla = document.getElementById('juego-pantalla');
         const resultadosPantalla = document.getElementById('resultados-pantalla');
+        const nivelesPantalla = document.getElementById('niveles-pantalla');
         const cronometroElemento = document.getElementById('cronometro');
         const cuadriculaElemento = document.getElementById('cuadricula');
         const reiniciarBtn = document.getElementById('reiniciarBtn');
         const cambiarBtn = document.getElementById('cambiarBtn');
-        const coloresBtn = document.getElementById('coloresBtn');
+        const nivelesBtn = document.getElementById('nivelesBtn');
         const resultadosBtn = document.getElementById('resultadosBtn');
         const mensajeElemento = document.getElementById('mensaje');
         const volverBtn = document.getElementById('volverBtn');
         const reiniciarDesdeResultadosBtn = document.getElementById('reiniciarDesdeResultadosBtn');
         const listaResultadosElemento = document.getElementById('lista-resultados');
+        const nivel1Btn = document.getElementById('nivel1Btn');
+        const nivel2Btn = document.getElementById('nivel2Btn');
+        const nivel3Btn = document.getElementById('nivel3Btn');
+        const volverNivelesBtn = document.getElementById('volverNivelesBtn');
 
         let tiempoTranscurrido = 0;
         let intervaloCronometro;
         let siguienteNumero = 1;
+        let nivelActual = 1; // Nivel predeterminado
+        let coloresNivel3 = {};
 
         let resultados = JSON.parse(localStorage.getItem('juegoNumerosResultados')) || [];
 
+        // --- Funciones de visualización de pantallas ---
         function mostrarJuego() {
             juegoPantalla.classList.add('activa');
             resultadosPantalla.classList.remove('activa');
+            nivelesPantalla.classList.remove('activa');
         }
 
         function mostrarResultados() {
             juegoPantalla.classList.remove('activa');
             resultadosPantalla.classList.add('activa');
+            nivelesPantalla.classList.remove('activa');
             actualizarListaResultados();
         }
 
+        function mostrarNiveles() {
+            juegoPantalla.classList.remove('activa');
+            resultadosPantalla.classList.remove('activa');
+            nivelesPantalla.classList.add('activa');
+        }
+
+        // --- Lógica del juego ---
         function generarNumeros() {
             const numeros = Array.from({length: 36}, (_, i) => i + 1);
             for (let i = numeros.length - 1; i > 0; i--) {
@@ -223,10 +263,22 @@
         function crearCuadricula() {
             cuadriculaElemento.innerHTML = '';
             const numeros = generarNumeros();
+            coloresNivel3 = {}; // Resetear colores para el Nivel 3
             numeros.forEach(numero => {
                 const recuadro = document.createElement('div');
                 recuadro.className = 'recuadro';
                 recuadro.textContent = numero;
+                
+                if (nivelActual === 3) {
+                    const r = Math.floor(Math.random() * 76) + 180;
+                    const g = Math.floor(Math.random() * 101) + 100;
+                    const b = Math.floor(Math.random() * 51);
+                    const colorAleatorio = `rgb(${r}, ${g}, ${b})`;
+                    recuadro.style.backgroundColor = colorAleatorio;
+                    recuadro.classList.add('nivel-3-color');
+                    coloresNivel3[numero] = colorAleatorio;
+                }
+
                 recuadro.addEventListener('click', () => manejarClic(recuadro, numero));
                 cuadriculaElemento.appendChild(recuadro);
             });
@@ -261,18 +313,27 @@
         function manejarClic(recuadro, numero) {
             iniciarCronometro();
             if (numero === siguienteNumero) {
-                recuadro.classList.add('correcto');
+                if (nivelActual === 1) {
+                    recuadro.classList.add('correcto');
+                } else if (nivelActual === 2) {
+                    // No cambia de color, simplemente queda en su estado original
+                } else if (nivelActual === 3) {
+                    recuadro.style.backgroundColor = coloresNivel3[numero];
+                }
+                
                 siguienteNumero++;
                 if (siguienteNumero > 36) {
                     pararCronometro();
-                    mensajeElemento.textContent = `¡Felicitaciones! Completaste el juego en ${cronometroElemento.textContent}.`;
-                    guardarResultado(cronometroElemento.textContent);
+                    mensajeElemento.textContent = `¡Felicitaciones! Completaste el Nivel ${nivelActual} en ${cronometroElemento.textContent}.`;
+                    guardarResultado(cronometroElemento.textContent, nivelActual);
                 }
             }
         }
 
-        function guardarResultado(tiempo) {
-            resultados.push(tiempo);
+        // --- Funciones para resultados y localStorage ---
+        function guardarResultado(tiempo, nivel) {
+            const resultado = { tiempo: tiempo, nivel: nivel };
+            resultados.push(resultado);
             localStorage.setItem('juegoNumerosResultados', JSON.stringify(resultados));
         }
 
@@ -283,32 +344,49 @@
             if (resultadosGuardados.length === 0) {
                 listaResultadosElemento.innerHTML = '<li>Aún no has completado ninguna partida.</li>';
             } else {
+                // Ordenar por nivel, luego por tiempo ascendente
+                resultadosGuardados.sort((a, b) => {
+                    if (a.nivel !== b.nivel) {
+                        return a.nivel - b.nivel;
+                    }
+                    const [minA, secA] = a.tiempo.split(':').map(Number);
+                    const [minB, secB] = b.tiempo.split(':').map(Number);
+                    const totalSecA = minA * 60 + secA;
+                    const totalSecB = minB * 60 + secB;
+                    return totalSecA - totalSecB;
+                });
+
                 resultadosGuardados.forEach((res, index) => {
                     const li = document.createElement('li');
-                    li.textContent = `Partida ${index + 1}: ${res}`;
+                    li.textContent = `Nivel ${res.nivel}: ${res.tiempo}`;
                     listaResultadosElemento.appendChild(li);
                 });
             }
         }
 
-        function cambiarColores() {
-            const recuadros = document.querySelectorAll('.recuadro');
-            recuadros.forEach(recuadro => {
-                const r = Math.floor(Math.random() * 76) + 180;
-                const g = Math.floor(Math.random() * 101) + 100;
-                const b = Math.floor(Math.random() * 51);
-                recuadro.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
-                recuadro.style.color = '#fff';
-            });
-        }
-
+        // --- Eventos de los botones ---
         reiniciarBtn.addEventListener('click', reiniciarJuego);
         cambiarBtn.addEventListener('click', reiniciarJuego);
-        coloresBtn.addEventListener('click', cambiarColores);
         resultadosBtn.addEventListener('click', mostrarResultados);
+        nivelesBtn.addEventListener('click', mostrarNiveles);
         volverBtn.addEventListener('click', mostrarJuego);
+        volverNivelesBtn.addEventListener('click', mostrarJuego);
         reiniciarDesdeResultadosBtn.addEventListener('click', reiniciarJuego);
 
+        nivel1Btn.addEventListener('click', () => {
+            nivelActual = 1;
+            reiniciarJuego();
+        });
+        nivel2Btn.addEventListener('click', () => {
+            nivelActual = 2;
+            reiniciarJuego();
+        });
+        nivel3Btn.addEventListener('click', () => {
+            nivelActual = 3;
+            reiniciarJuego();
+        });
+
+        // Inicializar el juego
         reiniciarJuego();
     </script>
 </body>
