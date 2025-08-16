@@ -429,7 +429,6 @@
             } else {
                 puntosBase = 300;
             }
-            // Si el tiempo es 0, evitamos la división por cero y retornamos 0
             if (tiempoTranscurrido === 0) {
                 return 0;
             }
@@ -449,9 +448,13 @@
         }
 
         function guardarResultado(tiempo, nivel, puntuacion) {
-            let resultadosGuardados = JSON.parse(localStorage.getItem('juegoNumerosResultados')) || [];
-            resultadosGuardados.push({ tiempo, nivel, puntuacion });
-            localStorage.setItem('juegoNumerosResultados', JSON.stringify(resultadosGuardados));
+            try {
+                let resultadosGuardados = JSON.parse(localStorage.getItem('juegoNumerosResultados')) || [];
+                resultadosGuardados.push({ tiempo, nivel, puntuacion });
+                localStorage.setItem('juegoNumerosResultados', JSON.stringify(resultadosGuardados));
+            } catch (error) {
+                console.error('Error al guardar el resultado en localStorage:', error);
+            }
         }
 
         function actualizarListaResultados() {
@@ -465,7 +468,7 @@
                     if (a.nivel !== b.nivel) {
                         return a.nivel - b.nivel;
                     }
-                    return b.puntuacion - a.puntuacion; // Ordenar por puntuación de mayor a menor
+                    return b.puntuacion - a.puntuacion;
                 });
     
                 resultadosGuardados.forEach(res => {
