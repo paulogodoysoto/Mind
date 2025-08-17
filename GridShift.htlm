@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GridShift</title>
+
+    <link rel="icon" href="GridMind_logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="GridMind_logo.png">
+    <link rel="manifest" href="manifest.json">
+
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        /* Contenedores de pantalla */
+        .pantalla {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            max-width: 600px;
+        }
+        .pantalla.activa {
+            display: flex;
+        }
+
+        /* Estilos de la pantalla de inicio */
+        #inicio-pantalla {
+            text-align: center;
+        }
+
+        #inicio-logo {
+            width: 150px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        #inicio-pantalla h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            color: #2196F3;
+        }
+
+        #inicio-pantalla p {
+            font-size: 1.2em;
+            text-align: center;
+            max-width: 400px;
+            margin: 10px 0 30px;
+        }
+
+        /* Estilos de la pantalla de juego */
+        #juego-pantalla h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        /* Título del temporizador y recuadro */
+        #cronometro-contenedor {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            background-color: #fcfcfc;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        #cronometro {
+            font-size: 3em;
+            text-align: center;
+            color: #A3D9A3;
+        }
+
+        /* Cuadrícula del juego */
+        #cuadricula {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 5px;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: #fcfcfc;
+            border: 2px solid #333;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Celda de la cuadrícula */
+        .celda {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+            border: 2px solid #333;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.5s;
+        }
+        .celda:hover {
+            transform: scale(1.05);
+        }
+
+        /* Contenedor de botones */
+        #botones, #botones-inicio {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        /* Estilo de los botones */
+        .boton {
+            padding: 12px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            color: white;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Colores de botones específicos */
+        #jugarBtn, #nuevaPartidaBtn {
+            background-color: #2196F3;
+        }
+
+        /* Efecto hover */
+        .boton:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+
+    </style>
+</head>
+<body>
+    <div id="inicio-pantalla" class="pantalla activa">
+        <img id="inicio-logo" src="GridMind_logo.png" alt="Logo de GridShift">
+        <h1>GridShift</h1>
+        <p>Encuentra la celda que no coincide en el menor tiempo posible. ¡Un desafío para tu percepción y agilidad!</p>
+        <div id="botones-inicio">
+            <button id="jugarBtn" class="boton">Jugar</button>
+        </div>
+    </div>
+
+    <div id="juego-pantalla" class="pantalla">
+        <div id="contenedor-principal">
+            <div id="cronometro-contenedor">
+                <div id="cronometro">00:00</div>
+            </div>
+            <div id="cuadricula"></div>
+            <div id="botones">
+                <button id="nuevaPartidaBtn" class="boton">Nueva Partida</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const inicioPantalla = document.getElementById('inicio-pantalla');
+        const juegoPantalla = document.getElementById('juego-pantalla');
+        const jugarBtn = document.getElementById('jugarBtn');
+        const nuevaPartidaBtn = document.getElementById('nuevaPartidaBtn');
+        const cronometroElemento = document.getElementById('cronometro');
+        const cuadriculaElemento = document.getElementById('cuadricula');
+        
+        let tiempoTranscurrido = 0;
+        let intervaloCronometro;
+        let juegoEnCurso = false;
+
+        function mostrarInicio() {
+            inicioPantalla.classList.add('activa');
+            juegoPantalla.classList.remove('activa');
+        }
+
+        function mostrarJuego() {
+            inicioPantalla.classList.remove('activa');
+            juegoPantalla.classList.add('activa');
+        }
+
+        function iniciarCronometro() {
+            if (!intervaloCronometro) {
+                intervaloCronometro = setInterval(() => {
+                    tiempoTranscurrido++;
+                    const minutos = Math.floor(tiempoTranscurrido / 60).toString().padStart(2, '0');
+                    const segundos = (tiempoTranscurrido % 60).toString().padStart(2, '0');
+                    cronometroElemento.textContent = `${minutos}:${segundos}`;
+                }, 1000);
+            }
+        }
+        
+        function pararCronometro() {
+            clearInterval(intervaloCronometro);
+            intervaloCronometro = null;
+        }
+
+        function iniciarJuego() {
+            pararCronometro();
+            tiempoTranscurrido = 0;
+            cronometroElemento.textContent = "00:00";
+            juegoEnCurso = true;
+            mostrarJuego();
+            // Lógica para crear el tablero del juego GridShift
+            crearCuadricula();
+            iniciarCronometro();
+        }
+
+        function crearCuadricula() {
+            cuadriculaElemento.innerHTML = '';
+            // TODO: Lógica para generar las celdas y la celda diferente
+            // Por ahora, solo creamos celdas de ejemplo
+            for (let i = 0; i < 36; i++) {
+                const celda = document.createElement('div');
+                celda.className = 'celda';
+                cuadriculaElemento.appendChild(celda);
+            }
+        }
+
+        function manejarClicCelda(event) {
+            // TODO: Lógica para comprobar si la celda es la correcta
+        }
+
+        // Event Listeners
+        jugarBtn.addEventListener('click', iniciarJuego);
+        nuevaPartidaBtn.addEventListener('click', iniciarJuego);
+
+        mostrarInicio();
+    </script>
+</body>
+</html>
